@@ -9,17 +9,26 @@ namespace PowerHabbitsMonitoring
 {
     static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         static void Main()
         {
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            if (Environment.UserInteractive)
             {
-                new Service1()
-            };
-            ServiceBase.Run(ServicesToRun);
+                //Launched as console app
+                var s = new PowerHabbitsMonitoring();
+                s.Start();
+                Console.ReadLine();
+            }
+            else
+            {
+                //Installed as a service
+                ServiceBase[] ServicesToRun;
+                ServicesToRun = new ServiceBase[]
+                {
+                    new PowerHabbitsMonitoring()
+                };
+                ServiceBase.Run(ServicesToRun);
+            }
+
         }
     }
 }

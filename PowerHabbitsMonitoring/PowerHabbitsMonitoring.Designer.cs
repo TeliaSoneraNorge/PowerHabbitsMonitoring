@@ -1,6 +1,6 @@
 ﻿namespace PowerHabbitsMonitoring
 {
-    partial class Service1
+    partial class PowerHabbitsMonitoring
     {
         /// <summary> 
         /// Required designer variable.
