@@ -1,6 +1,24 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PowerHabbitsMonitoring" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PerMonitorUsage" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">7.35</Value>
+    </Setting>
+    <Setting Name="TimerInterval" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="LogFileDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Users\dno1694\source\repos\PowerHabbitsMonitoring\PowerHabbitsMonitoring\bin\Debug</Value>
+    </Setting>
+    <Setting Name="DLLDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Users\dno1694\source\repos\PowerHabbitsMonitoring\PowerHabbitsMonitoring\bin\Debug</Value>
+    </Setting>
+    <Setting Name="TrackBattery" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="IdleTimeSeconds" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

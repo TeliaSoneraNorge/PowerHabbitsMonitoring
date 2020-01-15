@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.ServiceProcess;
 
 namespace PowerHabbitsMonitoring
@@ -69,6 +70,18 @@ namespace PowerHabbitsMonitoring
 
         protected override bool OnPowerEvent(PowerBroadcastStatus powerStatus)
         {
+            SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler((s, e) =>
+            {
+                switch (e.Mode)
+                {
+                    case PowerModes.Suspend:
+                        break;
+
+                    case PowerModes.Resume:
+                        break;
+                }
+            });
+
             switch (powerStatus)
             {
                 case PowerBroadcastStatus.Suspend:

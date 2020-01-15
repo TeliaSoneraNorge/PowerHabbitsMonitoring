@@ -81,8 +81,6 @@ namespace PowerHabbitsMonitoring
 
         }
 
-
-
         public static EnergyInterval GetPowerUsageSinceLastQuery()
         {
             if (ReadSample() == false)

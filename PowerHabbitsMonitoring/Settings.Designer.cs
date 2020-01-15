@@ -43,7 +43,8 @@ namespace PowerHabbitsMonitoring {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
+            "ebug")]
         public string LogFileDirectory {
             get {
                 return ((string)(this["LogFileDirectory"]));
@@ -52,7 +53,8 @@ namespace PowerHabbitsMonitoring {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
+            "ebug")]
         public string DLLDirectory {
             get {
                 return ((string)(this["DLLDirectory"]));
