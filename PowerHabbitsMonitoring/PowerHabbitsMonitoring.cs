@@ -7,13 +7,8 @@ namespace PowerHabbitsMonitoring
     public partial class PowerHabbitsMonitoring : ServiceBase
     {
         private System.Timers.Timer _timer;
-
-        private double _joulesTotal = 0;
         private double _tdp = 18;
-
-        private int _numMonitors = 3;
-        private bool _locked = false;
-        private bool _sleeping = false;
+        private Status _status = new Status();
 
         public PowerHabbitsMonitoring()
         {
@@ -55,67 +50,48 @@ namespace PowerHabbitsMonitoring
             switch (changeDescription.Reason)
             {
                 case SessionChangeReason.SessionLock:
-                    _numMonitors = 0;
-                    Logging.LogEvents("Locked");
-                    _locked = true;
+                    ChangeStatus(true, _status.Sleeping, _status.Inactive);
                     break;
 
                 case SessionChangeReason.SessionUnlock:
-                    _numMonitors = SystemStats.GetNumMonitors();
-                    Logging.LogEvents("Unlocked");
-                    _locked = false;
+                    ChangeStatus(false, _status.Sleeping, _status.Inactive);
                     break;
             }
         }
 
         protected override bool OnPowerEvent(PowerBroadcastStatus powerStatus)
         {
-            SystemEvents.PowerModeChanged += new PowerModeChangedEventHandler((s, e) =>
-            {
-                switch (e.Mode)
-                {
-                    case PowerModes.Suspend:
-                        break;
-
-                    case PowerModes.Resume:
-                        break;
-                }
-            });
-
             switch (powerStatus)
             {
                 case PowerBroadcastStatus.Suspend:
-                    _numMonitors = 0;
-                    Logging.LogEvents("Sleep");
-                    _sleeping = true;
+                    ChangeStatus(_status.Locked, true, _status.Inactive);
                     break;
                 case PowerBroadcastStatus.ResumeSuspend:
-                    _numMonitors = SystemStats.GetNumMonitors();
-                    Logging.LogEvents("Wake");
-                    _sleeping = false;
+                    ChangeStatus(_status.Locked, false, _status.Inactive);
                     break;
             }
             return base.OnPowerEvent(powerStatus);
         }
 
-        private void Update()
+        private void ChangeStatus(bool locked, bool sleeping, bool? inactive)
         {
-            _numMonitors = SystemStats.GetNumMonitors();
-            var energy = CorrectEnergyError(SystemStats.GetPowerUsageSinceLastQuery());
-            _joulesTotal += energy.joules + GetMonitorJoulesUsed(_numMonitors);
-            WriteData(energy);
+            if (_status.Locked != locked ||
+                _status.Sleeping != sleeping ||
+                _status.Inactive != inactive)
+            {
+                _status.EndTime = DateTime.Now;
+                Logging.Log(_status);
+            }
+            _status.StartTime = DateTime.Now;
+            _status.Inactive = inactive;
+            _status.Locked = locked;
+            _status.Sleeping = sleeping;
         }
 
-        private void WriteData(EnergyInterval energy)
+        private void Update()
         {
-            var line = $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, " +
-                       $"{(_locked ? "Locked" : "Unlocked")}, " +
-                       $"{(_sleeping ? "Sleeping" : "Awake")}, " +
-                       $"{Math.Round(_joulesTotal / 3600.0, 4)}, " +
-                       $"{GetTotalWattUsage(energy, _numMonitors)}, " +
-                       $"{_numMonitors}\n";
-
-            Logging.Log(line);
+            var energy = CorrectEnergyError(SystemStats.GetPowerUsageSinceLastQuery());
+            _status.Value += (energy.joules + SystemStats.GetTotalMonitorWattUsage()) / 3600.0;
         }
 
         private EnergyInterval CorrectEnergyError(EnergyInterval energy)
@@ -126,21 +102,6 @@ namespace PowerHabbitsMonitoring
                 energy.watts = _tdp;
             }
             return energy;
-        }
-
-        private double GetTotalWattUsage(EnergyInterval energy, int numMonitors)
-        {
-            return energy.watts + GetMonitorWattUsage(numMonitors);
-        }
-
-        private double GetMonitorWattUsage(int numMonitors)
-        {
-            return numMonitors * Settings.Default.PerMonitorUsage;
-        }
-
-        private double GetMonitorJoulesUsed(int numMonitors)
-        {
-            return GetMonitorWattUsage(numMonitors) * Settings.Default.TimerInterval;
         }
     }
 }

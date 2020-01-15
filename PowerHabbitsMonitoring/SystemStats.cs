@@ -148,5 +148,9 @@ namespace PowerHabbitsMonitoring
             return whleft;
         }
 
+        public static double GetTotalMonitorWattUsage()
+        {
+            return 0;
+        }
     }
 }
