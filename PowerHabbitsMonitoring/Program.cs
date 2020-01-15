@@ -12,7 +12,10 @@ namespace PowerHabbitsMonitoring
                 //Launched as console app
                 var s = new PowerHabbitsMonitoring();
                 s.Start();
+                //s.TestSend();
                 Console.ReadLine();
+
+                
             }
             else
             {

@@ -1,6 +1,11 @@
 ﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.ServiceProcess;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerHabbitsMonitoring
 {
@@ -15,6 +20,11 @@ namespace PowerHabbitsMonitoring
             InitializeComponent();
         }
 
+        public void TestSend()
+        {
+            UpdateDatabase();
+        }
+
         public void Start()
         {
             OnStart(new string[] { });
@@ -27,6 +37,7 @@ namespace PowerHabbitsMonitoring
                 SystemStats.GetPowerUsageSinceLastQuery();
                 SystemStats.GetTDP(0, ref _tdp);
                 _timer = new System.Timers.Timer(Settings.Default.TimerInterval * 1000);
+                SetupNextDBReport();
                 Update();
                 _timer.Elapsed += (s, e) =>
                 {
@@ -90,6 +101,26 @@ namespace PowerHabbitsMonitoring
 
         private void Update()
         {
+            if (!string.IsNullOrEmpty(Settings.Default.LastDBWrite))
+            {
+                try
+                {
+                    var lastDBWrite = DateTime.Parse(Settings.Default.LastDBWrite);
+                    if(lastDBWrite > DateTime.Now + TimeSpan.FromDays(2))
+                    {
+                        UpdateDatabase();
+                    }
+                }
+                catch (Exception)
+                {
+                    //Ignore
+                }
+            }
+            else
+            {
+                UpdateDatabase();
+            }
+
             var inactiveTime = SystemStats.GetInactiveTime();
             if(inactiveTime > Settings.Default.IdleTimeSeconds)
             {
@@ -114,6 +145,38 @@ namespace PowerHabbitsMonitoring
                 energy.watts = _tdp;
             }
             return energy;
+        }
+
+        private void SetupNextDBReport()
+        {
+            var now = DateTime.Now;
+            var targetTime = new DateTime(now.Year, now.Month, now.Day, 8, 0, 0);
+            if(targetTime < now)
+            {
+                targetTime = targetTime.AddDays(1);
+            }
+            var delay = targetTime - now;
+            Task.Delay(delay).ContinueWith(t => { UpdateDatabase(); });
+        }
+
+        private List<Status> ReadStatuses()
+        {
+            var statuses = new List<Status>();
+            if(File.Exists(Settings.Default.StatusCache))
+            {
+                var json = "[" + File.ReadAllText(Settings.Default.StatusCache) + "]";
+                statuses = JsonConvert.DeserializeObject<List<Status>>(json);
+            }            
+            return statuses;
+        }
+
+        private void UpdateDatabase()
+        {
+            var statuses = ReadStatuses();
+            Settings.Default.LastDBWrite = DateTime.Now.ToString();
+            Settings.Default.Save();
+            DAL.UpdateStatuses(statuses);
+            File.Delete(Settings.Default.StatusCache);
         }
     }
 }

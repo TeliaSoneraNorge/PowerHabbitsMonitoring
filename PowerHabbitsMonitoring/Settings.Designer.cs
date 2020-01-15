@@ -88,5 +88,36 @@ namespace PowerHabbitsMonitoring {
                 return ((string)(this["InactiveTimeFile"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
+            "ebug\\StatusCache.txt")]
+        public string StatusCache {
+            get {
+                return ((string)(this["StatusCache"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ws000webdev1.tcad.telia.se/PowerConsumptionMonitor/api/PowerConsumption")]
+        public string PostUrl {
+            get {
+                return ((string)(this["PostUrl"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastDBWrite {
+            get {
+                return ((string)(this["LastDBWrite"]));
+            }
+            set {
+                this["LastDBWrite"] = value;
+            }
+        }
     }
 }

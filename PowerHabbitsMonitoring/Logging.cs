@@ -22,7 +22,7 @@ namespace PowerHabbitsMonitoring
         public static void Log(Status status)
         {
             var json = JsonConvert.SerializeObject(status);
-            File.AppendAllText(Settings.Default.LogFileDirectory + $"/events{DateTime.Now.ToString("yyyy-MM-dd")}.log", json + "\n");
+            File.AppendAllText(Settings.Default.StatusCache, json + ",\n");
         }
 
         public static void LogEvents(string line)
