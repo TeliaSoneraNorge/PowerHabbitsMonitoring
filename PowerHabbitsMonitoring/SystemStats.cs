@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -14,6 +15,8 @@ namespace PowerHabbitsMonitoring
 
     public class SystemStats
     {
+        private static Dictionary<string, double> monitorPowerUsageMap = new Dictionary<string, double>();
+
         [DllImport("EnergyLib64.dll")]
         public static extern bool IntelEnergyLibInitialize();
 
@@ -162,7 +165,36 @@ namespace PowerHabbitsMonitoring
 
         public static double GetTotalMonitorWattUsage()
         {
-            return 0;
+            var powerUsage = 0.0;
+            try
+            {
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\WMI", "select * from WmiMonitorID");
+                foreach(var o in searcher.Get())
+                {
+                    foreach(var p in o.Properties)
+                    {
+                        var str = "";
+                        if(p.Name == "UserFriendlyName")
+                        {
+                            var arr = (ushort[])p.Value;
+                            foreach(char c in arr)
+                            {
+                                if(char.IsLetterOrDigit(c) || c == ' ')
+                                {
+                                    str += c;
+                                }
+                            }
+                            powerUsage += monitorPowerUsageMap[str];
+                        }
+
+                    }
+                }
+                return searcher.Get().Count;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
         }
     }
 }

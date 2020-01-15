@@ -10,12 +10,11 @@ namespace PowerHabbitsMonitoring
             if (Environment.UserInteractive)
             {
                 //Launched as console app
-                var s = new PowerHabbitsMonitoring();
-                s.Start();
+                //var s = new PowerHabbitsMonitoring();
+                //s.Start();
                 //s.TestSend();
+                SystemStats.GetTotalMonitorWattUsage();
                 Console.ReadLine();
-
-                
             }
             else
             {
@@ -27,7 +26,6 @@ namespace PowerHabbitsMonitoring
                 };
                 ServiceBase.Run(ServicesToRun);
             }
-
         }
     }
 }
