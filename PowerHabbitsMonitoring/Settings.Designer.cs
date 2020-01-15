@@ -72,10 +72,20 @@ namespace PowerHabbitsMonitoring {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("300")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public double IdleTimeSeconds {
             get {
                 return ((double)(this["IdleTimeSeconds"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
+            "ebug\\activity.txt")]
+        public string InactiveTimeFile {
+            get {
+                return ((string)(this["InactiveTimeFile"]));
             }
         }
     }

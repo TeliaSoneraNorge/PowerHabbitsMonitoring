@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,6 +81,20 @@ namespace PowerHabbitsMonitoring
                 Logging.Log(e.Message);
             }
 
+        }
+
+        public static double GetInactiveTime()
+        {
+            var inactiveTime = 0.0;
+            try
+            {
+                var number = File.ReadAllText(Settings.Default.InactiveTimeFile);
+                inactiveTime = double.Parse(number);
+            }
+            catch (Exception e)
+            {
+            }
+            return inactiveTime;
         }
 
         public static EnergyInterval GetPowerUsageSinceLastQuery()

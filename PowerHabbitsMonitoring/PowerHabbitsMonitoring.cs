@@ -90,6 +90,18 @@ namespace PowerHabbitsMonitoring
 
         private void Update()
         {
+            var inactiveTime = SystemStats.GetInactiveTime();
+            if(inactiveTime > Settings.Default.IdleTimeSeconds)
+            {
+                ChangeStatus(_status.Locked, _status.Sleeping, true);
+            }
+            else
+            {
+                if(_status.Inactive.Value)
+                {
+                    ChangeStatus(_status.Locked, _status.Sleeping, false);
+                }
+            }
             var energy = CorrectEnergyError(SystemStats.GetPowerUsageSinceLastQuery());
             _status.Value += (energy.joules + SystemStats.GetTotalMonitorWattUsage()) / 3600.0;
         }
