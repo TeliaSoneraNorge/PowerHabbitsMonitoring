@@ -111,12 +111,12 @@ namespace PowerHabbitsMonitoring {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LastDBWrite {
+        public string GetUrl {
             get {
-                return ((string)(this["LastDBWrite"]));
+                return ((string)(this["GetUrl"]));
             }
             set {
-                this["LastDBWrite"] = value;
+                this["GetUrl"] = value;
             }
         }
     }

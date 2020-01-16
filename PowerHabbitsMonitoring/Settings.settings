@@ -29,7 +29,7 @@
     <Setting Name="PostUrl" Type="System.String" Scope="Application">
       <Value Profile="(Default)">http://ws000webdev1.tcad.telia.se/PowerConsumptionMonitor/api/PowerConsumption</Value>
     </Setting>
-    <Setting Name="LastDBWrite" Type="System.String" Scope="User">
+    <Setting Name="GetUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

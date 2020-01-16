@@ -11,7 +11,8 @@ namespace PowerHabbitsMonitoring
 {
     public partial class PowerHabbitsMonitoring : ServiceBase
     {
-        private System.Timers.Timer _timer;
+        private System.Timers.Timer _inactiveTimer;
+        private System.Timers.Timer _dbTimer;
         private double _tdp = 18;
         private Status _status = new Status();
 
@@ -36,14 +37,26 @@ namespace PowerHabbitsMonitoring
             {
                 SystemStats.GetPowerUsageSinceLastQuery();
                 SystemStats.GetTDP(0, ref _tdp);
-                _timer = new System.Timers.Timer(Settings.Default.TimerInterval * 1000);
-                SetupNextDBReport();
+
                 Update();
-                _timer.Elapsed += (s, e) =>
+                _inactiveTimer = new System.Timers.Timer(DBSettingsProvider.Default.IdleTimeCheckIntervalSeconds * 1000);
+                _inactiveTimer.Elapsed += (s, e) =>
                 {
                     Update();
                 };
-                _timer.Start();
+                _inactiveTimer.Start();
+
+                var rand = new Random();
+                Task.Delay(rand.Next(DBSettingsProvider.Default.DBSendOnStartMinDelayMinutes, DBSettingsProvider.Default.DBSendOnStartMaxDelayMinutes) * 60 * 1000).ContinueWith(t =>
+                {
+                    UpdateDatabase();
+                });
+                _dbTimer = new System.Timers.Timer(DBSettingsProvider.Default.DBSendIntervalHours * 3600 * 1000);
+                _dbTimer.Elapsed += (s, e) =>
+                {
+                    UpdateDatabase();
+                };
+                _dbTimer.Start();
             }
             catch (Exception e)
             {
@@ -101,26 +114,6 @@ namespace PowerHabbitsMonitoring
 
         private void Update()
         {
-            if (!string.IsNullOrEmpty(Settings.Default.LastDBWrite))
-            {
-                try
-                {
-                    var lastDBWrite = DateTime.Parse(Settings.Default.LastDBWrite);
-                    if(lastDBWrite > DateTime.Now + TimeSpan.FromDays(2))
-                    {
-                        UpdateDatabase();
-                    }
-                }
-                catch (Exception)
-                {
-                    //Ignore
-                }
-            }
-            else
-            {
-                UpdateDatabase();
-            }
-
             var inactiveTime = SystemStats.GetInactiveTime();
             if(inactiveTime > Settings.Default.IdleTimeSeconds)
             {
@@ -150,12 +143,12 @@ namespace PowerHabbitsMonitoring
         private void SetupNextDBReport()
         {
             var now = DateTime.Now;
-            var targetTime = new DateTime(now.Year, now.Month, now.Day, 8, 0, 0);
+            var targetTime = new DateTime(now.Year, now.Month, now.Day, 8, 0, 0); //Maybe settings
             if(targetTime < now)
             {
                 targetTime = targetTime.AddDays(1);
             }
-            var delay = targetTime - now;
+            var delay = targetTime - now; //forgot delay
             Task.Delay(delay).ContinueWith(t => { UpdateDatabase(); });
         }
 
@@ -172,8 +165,9 @@ namespace PowerHabbitsMonitoring
 
         private void UpdateDatabase()
         {
+            DBSettingsProvider.Update();
             var statuses = ReadStatuses();
-            Settings.Default.LastDBWrite = DateTime.Now.ToString();
+            Settings.Default.GetUrl = DateTime.Now.ToString();
             Settings.Default.Save();
             DAL.UpdateStatuses(statuses);
             File.Delete(Settings.Default.StatusCache);
