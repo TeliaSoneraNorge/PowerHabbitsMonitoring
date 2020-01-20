@@ -25,57 +25,11 @@ namespace PowerHabbitsMonitoring {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("7.35")]
-        public double PerMonitorUsage {
-            get {
-                return ((double)(this["PerMonitorUsage"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
-        public double TimerInterval {
-            get {
-                return ((double)(this["TimerInterval"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
-            "ebug")]
-        public string LogFileDirectory {
-            get {
-                return ((string)(this["LogFileDirectory"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
             "ebug")]
         public string DLLDirectory {
             get {
                 return ((string)(this["DLLDirectory"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool TrackBattery {
-            get {
-                return ((bool)(this["TrackBattery"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public double IdleTimeSeconds {
-            get {
-                return ((double)(this["IdleTimeSeconds"]));
             }
         }
         
@@ -99,24 +53,15 @@ namespace PowerHabbitsMonitoring {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://ws000webdev1.tcad.telia.se/PowerConsumptionMonitor/api/PowerConsumption")]
-        public string PostUrl {
-            get {
-                return ((string)(this["PostUrl"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string GetUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ws000webdev1.tcad.telia.se/PowerConsumptionMonitor/api/PowerConsumption")]
+        public string ApiURL {
             get {
-                return ((string)(this["GetUrl"]));
+                return ((string)(this["ApiURL"]));
             }
             set {
-                this["GetUrl"] = value;
+                this["ApiURL"] = value;
             }
         }
     }
