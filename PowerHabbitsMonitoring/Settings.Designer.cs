@@ -23,33 +23,39 @@ namespace PowerHabbitsMonitoring {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
-            "ebug")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Public\\AppData\\Local\\Telia\\PowerHabbitsMonitoring")]
         public string DLLDirectory {
             get {
                 return ((string)(this["DLLDirectory"]));
             }
+            set {
+                this["DLLDirectory"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
-            "ebug\\activity.txt")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Public\\AppData\\Local\\Telia\\PowerHabbitsMonitoring\\activity.txt")]
         public string InactiveTimeFile {
             get {
                 return ((string)(this["InactiveTimeFile"]));
             }
+            set {
+                this["InactiveTimeFile"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\dno1694\\source\\repos\\PowerHabbitsMonitoring\\PowerHabbitsMonitoring\\bin\\D" +
-            "ebug\\StatusCache.txt")]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Public\\AppData\\Local\\Telia\\PowerHabbitsMonitoring\\StatusCache.txt")]
         public string StatusCache {
             get {
                 return ((string)(this["StatusCache"]));
+            }
+            set {
+                this["StatusCache"] = value;
             }
         }
         
@@ -62,6 +68,19 @@ namespace PowerHabbitsMonitoring {
             }
             set {
                 this["ApiURL"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Public\\AppData\\Local\\Telia\\PowerHabbitsMonitoring\\ActivityTracker\\LastAc" +
+            "tivityTracker.exe")]
+        public string ActiveStatusExe {
+            get {
+                return ((string)(this["ActiveStatusExe"]));
+            }
+            set {
+                this["ActiveStatusExe"] = value;
             }
         }
     }

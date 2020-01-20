@@ -1,4 +1,6 @@
-﻿using System.ServiceProcess;
+﻿using System;
+using System.IO;
+using System.ServiceProcess;
 
 namespace PowerHabbitsMonitoring
 {
@@ -21,12 +23,21 @@ namespace PowerHabbitsMonitoring
 
         protected override void OnStart(string[] args)
         {
-            _settings = new DBSettingsProvider();
-            _statusService = new StatusService(_settings);
-            _dbService = new DBService(_settings);
+            try
+            {
+                _settings = new DBSettingsProvider();
+                _statusService = new StatusService(_settings);
+                _dbService = new DBService(_settings);
 
-            _statusService.Run();
-            _dbService.Run();
+                _statusService.Run();
+                _dbService.Run();
+            }
+            catch(Exception e)
+            {
+                File.WriteAllText(
+                    @"C:\Users\dno1694\source\repos\PowerHabbitsMonitoring\PowerHabbitsMonitoring\bin\Debug\error.txt", e.Message);
+                throw e;
+            }
         }
 
         protected override void OnSessionChange(SessionChangeDescription changeDescription)

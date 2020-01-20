@@ -51,11 +51,12 @@ namespace PowerHabbitsMonitoring
                 File.Delete(Settings.Default.StatusCache);
             }
             _timer.Interval = _settings.Default.DBSendIntervalHours * 3600000;
+            _lastWriteTime = DateTime.Now;
         }
 
         public void SendIfNeedsSending()
         {
-            if(DateTime.Now - TimeSpan.FromHours(_settings.Default.DBSendIntervalHours) < _lastWriteTime)
+            if(DateTime.Now - TimeSpan.FromHours(_settings.Default.DBSendIntervalHours) > _lastWriteTime)
             {
                 Update();
             }
