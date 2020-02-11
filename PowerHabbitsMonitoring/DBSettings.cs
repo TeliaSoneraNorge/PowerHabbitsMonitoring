@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -8,6 +9,7 @@ namespace PowerHabbitsMonitoring
     public class DBSettingsProvider
     {
         public DBSettings Default;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public DBSettingsProvider()
         {
@@ -16,12 +18,19 @@ namespace PowerHabbitsMonitoring
 
         public void Update()
         {
-            using (var httpClient = new HttpClient())
+            try
             {
-                var rez = httpClient.GetAsync(Settings.Default.ApiURL + $"/{Environment.MachineName}").Result;
-                var json = rez.Content.ReadAsStringAsync().Result;
-                Default = JsonConvert.DeserializeObject<DBSettings>(json);
+                using (var httpClient = new HttpClient())
+                {
+                    var rez = httpClient.GetAsync("http://ws000webdev1.tcad.telia.se/PowerConsumptionMonitor/api/PowerConsumption" + $"/{Environment.MachineName}").Result;
+                    var json = rez.Content.ReadAsStringAsync().Result;
+                    Default = JsonConvert.DeserializeObject<DBSettings>(json);
+                }
             }
+            catch(Exception e)
+            {
+                _logger.Error(e, "Error updating settings from database");
+            }            
         }
     }
 

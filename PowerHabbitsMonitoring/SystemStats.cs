@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NLog;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -38,21 +40,23 @@ namespace PowerHabbitsMonitoring
         private int _numMsrs = 0;
         private double _tdp = 18.0;
         private DBSettingsProvider _settings;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public SystemStats(DBSettingsProvider settings)
         {
             try
             {
                 _settings = settings;
-                Environment.SetEnvironmentVariable("PATH", Settings.Default.DLLDirectory);
+                Environment.SetEnvironmentVariable("PATH", AppDomain.CurrentDomain.BaseDirectory);
                 if (IntelEnergyLibInitialize() == false)
                 {
                     throw new Exception("Failed to init energy lib.");
                 }
                 GetNumMsrs(ref _numMsrs);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error(e, "Exception on creating static SystemStats instance.");
             }
 
         }
@@ -61,91 +65,126 @@ namespace PowerHabbitsMonitoring
         {
             try
             {
-                var number = File.ReadAllText(Settings.Default.InactiveTimeFile);
-                return double.Parse(number);
+                var content = "";
+                using (var fileStream = new FileStream("activity.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var textReader = new StreamReader(fileStream))
+                {
+                    content = textReader.ReadToEnd();
+                }
+
+                if(string.IsNullOrEmpty(content))
+                {
+                    return null;
+                }
+                File.WriteAllText("activity.txt", "");
+                return double.Parse(content);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.Error(e, "Exception getting inactive time.");
                 return null;
             }
         }
 
         public double GetPowerUsageSinceLastQuery()
         {
-            if (ReadSample() == false)
+            try
             {
-                throw new Exception("Error reading new sample");
-            }
-
-            var whUsed = 0.0;
-            for (int j = 0; j < _numMsrs; j++)
-            {
-                int funcID = 0;
-                GetMsrFunc(j, ref funcID);
-                double[] data = new double[3];
-                int nData = 0;
-                StringBuilder szName = new StringBuilder(260);
-
-                GetPowerData(0, j, data, ref nData);
-                GetMsrName(j, szName);
-
-                if (szName.ToString() == "Processor")
+                if (ReadSample() == false)
                 {
-                    whUsed += data[2] / 1000.0;
+                    throw new Exception("Error reading new sample");
                 }
 
-                if (szName.ToString() == "DRAM")
+                var whUsed = 0.0;
+                for (int j = 0; j < _numMsrs; j++)
                 {
-                    whUsed += data[2] / 1000.0;
-                }
-            }
+                    int funcID = 0;
+                    GetMsrFunc(j, ref funcID);
+                    double[] data = new double[3];
+                    int nData = 0;
+                    StringBuilder szName = new StringBuilder(260);
 
-            return whUsed;
+                    GetPowerData(0, j, data, ref nData);
+                    GetMsrName(j, szName);
+
+                    if (szName.ToString() == "Processor")
+                    {
+                        whUsed += data[2] / 1000.0;
+                    }
+
+                    if (szName.ToString() == "DRAM")
+                    {
+                        whUsed += data[2] / 1000.0;
+                    }
+                }
+                return whUsed;
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Exception getting power.");
+                return 0;
+            }         
         }
 
         public double GetCorrectedTotalEnergy(double timePassed)
         {
-            var cpuEnergy = GetPowerUsageSinceLastQuery();
-            var maxCpuEnergy = _tdp * 10 * timePassed / 3600.0;
-            if(cpuEnergy > maxCpuEnergy)
+            try
             {
-                cpuEnergy = _tdp * timePassed / 3600.0;
+                var cpuEnergy = GetPowerUsageSinceLastQuery();
+                var maxCpuEnergy = _tdp * 10 * timePassed / 3600.0;
+                if (cpuEnergy > maxCpuEnergy)
+                {
+                    cpuEnergy = _tdp * timePassed / 3600.0;
+                }
+                var monitorEnergy = GetTotalMonitorWattUsage() * timePassed / 3600.0;
+                return cpuEnergy + monitorEnergy;
             }
-            var monitorEnergy = GetTotalMonitorWattUsage() * timePassed / 3600.0;
-            return cpuEnergy + monitorEnergy;
+            catch(Exception e)
+            {
+                _logger.Error(e, "Exception getting total energy.");
+                return 0;
+            }
         }
 
         public double GetTotalMonitorWattUsage()
         {
-            var powerUsage = 0.0;
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\WMI", "select * from WmiMonitorID");
-            foreach (var o in searcher.Get())
+            try
             {
-                foreach (var p in o.Properties)
+                var powerUsage = 0.0;
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\WMI", "select * from WmiMonitorID");
+                foreach (var o in searcher.Get())
                 {
-                    var str = "";
-                    if (p.Name == "UserFriendlyName")
+                    foreach (var p in o.Properties)
                     {
-                        var arr = (ushort[])p.Value;
-                        foreach (char c in arr)
+                        var str = "";
+                        if (p.Name == "UserFriendlyName")
                         {
-                            if (char.IsLetterOrDigit(c) || c == ' ')
+                            var arr = (ushort[])p.Value;
+                            foreach (char c in arr)
                             {
-                                str += c;
+                                if (char.IsLetterOrDigit(c) || c == ' ')
+                                {
+                                    str += c;
+                                }
                             }
-                        }
-                        if (_settings.Default.MonitorWattUsage.ContainsKey(str))
-                        {
-                            powerUsage += _settings.Default.MonitorWattUsage[str];
-                        }
-                        else
-                        {
-                            powerUsage += _settings.Default.DefaultMonitorWattUsage;
+                            if (_settings.Default.MonitorWattUsage.ContainsKey(str))
+                            {
+                                powerUsage += _settings.Default.MonitorWattUsage[str];
+                            }
+                            else
+                            {
+                                powerUsage += _settings.Default.DefaultMonitorWattUsage;
+                            }
                         }
                     }
                 }
+                return powerUsage;
             }
-            return powerUsage;
+            catch(Exception e)
+            {
+                _logger.Error(e, "Error getting monitor watts.");
+                return 0;
+            }            
         }
     }
 }

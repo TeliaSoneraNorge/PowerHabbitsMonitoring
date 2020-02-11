@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.IO;
 using System.ServiceProcess;
 
@@ -10,9 +11,12 @@ namespace PowerHabbitsMonitoring
         private StatusService _statusService;
         private DBSettingsProvider _settings;
 
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
 
         public PowerHabbitsMonitoring()
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             InitializeComponent();
         }
 
@@ -34,9 +38,7 @@ namespace PowerHabbitsMonitoring
             }
             catch(Exception e)
             {
-                File.WriteAllText(
-                    @"C:\Users\dno1694\source\repos\PowerHabbitsMonitoring\PowerHabbitsMonitoring\bin\Debug\error.txt", e.Message);
-                throw e;
+                _logger.Error(e, "Exception onstart.");
             }
         }
 

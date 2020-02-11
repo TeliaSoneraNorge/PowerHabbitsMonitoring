@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.ServiceProcess;
@@ -7,40 +8,35 @@ namespace PowerHabbitsMonitoring
 {
     static class Program
     {
-        public static void StartActivityLogger()
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        private static void ConfigureLogger()
         {
-            try
-            {
-                using (Process myProcess = new Process())
-                {
-                    myProcess.StartInfo.UseShellExecute = false;
-                    myProcess.StartInfo.FileName = Settings.Default.ActiveStatusExe;
-                    myProcess.StartInfo.CreateNoWindow = false;
-                    myProcess.Start();
-                }
-            }
-            catch (Exception e)
-            {
-                //Rethrow, application should not start.
-                throw e;
-            }
+            var config = new NLog.Config.LoggingConfiguration();
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "error.txt", Layout = "${longdate} ${message} ${exception:format=tostring}" };
+
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+            LogManager.Configuration = config;
         }
 
         static void Main()
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+            ConfigureLogger();
+            _logger.Info("Application started");
+
             if (Environment.UserInteractive)
             {
-                StartActivityLogger();
+                _logger.Info("Running in console mode.");
                 var s = new PowerHabbitsMonitoring();
                 s.Start();
-                Console.ReadLine();
             }
             else
             {
                 try
                 {
                     //Installed as a service
-                    StartActivityLogger();
+                    Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
                     ServiceBase[] ServicesToRun;
                     ServicesToRun = new ServiceBase[]
                     {
@@ -50,9 +46,8 @@ namespace PowerHabbitsMonitoring
                 }
                 catch(Exception e)
                 {
-                    File.WriteAllText(@"C:\Users\dno1694\source\repos\PowerHabbitsMonitoring\PowerHabbitsMonitoring\bin\Debug\error.txt", e.Message);
+                    _logger.Error(e, "Exception in main.");
                 }
-                
             }
         }
     }
