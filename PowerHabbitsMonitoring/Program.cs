@@ -30,6 +30,7 @@ namespace PowerHabbitsMonitoring
                 _logger.Info("Running in console mode.");
                 var s = new PowerHabbitsMonitoring();
                 s.Start();
+                Console.ReadLine();
             }
             else
             {

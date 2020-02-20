@@ -2,9 +2,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace PowerHabbitsMonitoring
 {
@@ -41,6 +44,7 @@ namespace PowerHabbitsMonitoring
         private double _tdp = 18.0;
         private DBSettingsProvider _settings;
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private double? inactiveTime = 0;
 
         public SystemStats(DBSettingsProvider settings)
         {
@@ -53,37 +57,55 @@ namespace PowerHabbitsMonitoring
                     throw new Exception("Failed to init energy lib.");
                 }
                 GetNumMsrs(ref _numMsrs);
+                StartGettingInactiveTime();
             }
             catch (Exception e)
             {
                 _logger.Error(e, "Exception on creating static SystemStats instance.");
             }
-
         }
+
+        public void StartGettingInactiveTime()
+        {
+            Task.Run(() =>
+            {
+                while (RunNamedPipe() == 1)
+                {
+                    inactiveTime = null;
+                }
+            });
+        }
+
+        private int RunNamedPipe()
+        {
+            var exitCode = 0;
+            using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("LastActivityTracker"))
+            {
+                namedPipeClient.Connect();
+                using (var reader = new BinaryReader(namedPipeClient))
+                {
+                    while (exitCode == 0)
+                    {
+                        try
+                        {
+                            inactiveTime = reader.ReadDouble();
+                        }
+                        catch (Exception e)
+                        {
+                            exitCode = 1;
+                            _logger.Error("Named pipe 'LastActivityTrackerClosed unexpectedly'");
+                        }
+                    }
+
+                }
+            }
+            return exitCode;
+        }
+
 
         public double? GetInactiveTime()
         {
-            try
-            {
-                var content = "";
-                using (var fileStream = new FileStream("activity.txt", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var textReader = new StreamReader(fileStream))
-                {
-                    content = textReader.ReadToEnd();
-                }
-
-                if(string.IsNullOrEmpty(content))
-                {
-                    return null;
-                }
-                File.WriteAllText("activity.txt", "");
-                return double.Parse(content);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, "Exception getting inactive time.");
-                return null;
-            }
+            return inactiveTime;
         }
 
         public double GetPowerUsageSinceLastQuery()
