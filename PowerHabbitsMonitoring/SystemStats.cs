@@ -69,17 +69,20 @@ namespace PowerHabbitsMonitoring
         {
             Task.Run(() =>
             {
+                _logger.Debug("Started named pipe loop with recovery.");
                 while (RunNamedPipe() == 1)
                 {
                     inactiveTime = null;
                 }
+                _logger.Debug("Ended named pipe loop with recovery.");
             });
         }
 
         private int RunNamedPipe()
         {
+            _logger.Debug("Attempting to run a named pipe.");
             var exitCode = 0;
-            using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("LastActivityTracker"))
+            using (var namedPipeClient = new NamedPipeClientStream("LastActivityTracker"))
             {
                 namedPipeClient.Connect();
                 using (var reader = new BinaryReader(namedPipeClient))
@@ -89,6 +92,7 @@ namespace PowerHabbitsMonitoring
                         try
                         {
                             inactiveTime = reader.ReadDouble();
+                            _logger.Debug($"Named pipe updated inactive time to {inactiveTime}");
                         }
                         catch (Exception e)
                         {
@@ -99,9 +103,9 @@ namespace PowerHabbitsMonitoring
 
                 }
             }
+            _logger.Debug($"Named pipe exited with code {exitCode}");
             return exitCode;
         }
-
 
         public double? GetInactiveTime()
         {
